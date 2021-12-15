@@ -29,7 +29,7 @@
     "@react-icons/all-files": "^4.1.0",
     "@superset-ui/chart-controls": "0.18.25",
     "@superset-ui/core": "0.18.25",
-    "@types/d3-array": "^2.9.0",
+    "@types/d3-array": "^3.0.2",
     "@types/react-table": "^7.0.29",
     "d3-array": "^2.4.0",
     "match-sorter": "^6.3.0",

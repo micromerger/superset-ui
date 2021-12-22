@@ -21,7 +21,7 @@ import {
   supersetTheme,
   TimeseriesDataRecord,
 } from '@superset-ui/core';
-
+import { ColorFormatters } from '@superset-ui/chart-controls';
 export interface HelloWorldStylesProps {
   height: number;
   width: number;
@@ -58,5 +58,6 @@ export type HelloWorldProps = HelloWorldStylesProps &
     showPolygonLayer: Boolean;
     showStreetMap: Boolean;
     showCircleLayer: Boolean;
+    metricColorFormatters: ColorFormatters;
     // add typing here for the props you pass in from transformProps.ts!
   };

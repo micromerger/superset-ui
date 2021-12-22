@@ -37,10 +37,10 @@ const config: ControlPanelConfig = {
             name: 'select_country',
             config: {
               type: 'SelectControl',
-              label: t('Country'),
+              label: t('Area Level'),
               default: null,
               choices: countryOptions,
-              description: t('Which country to plot the map for?'),
+              description: t('Which area to plot the map for?'),
               validators: [validateNonEmpty],
             },
           },
@@ -75,9 +75,9 @@ const config: ControlPanelConfig = {
   ],
   controlOverrides: {
     entity: {
-      label: t('ISO 3166-2 Codes'),
+      label: t('Area ID'),
       description: t(
-        'Column containing ISO 3166-2 codes of region/province/department in your table.',
+        'Column containing region/province/department in your table.',
       ),
     },
     metric: {

@@ -17,7 +17,7 @@
  * under the License.
  */
 import { ChartProps, TimeseriesDataRecord } from '@superset-ui/core';
-
+import { getColorFormatters } from '@superset-ui/chart-controls';
 export default function transformProps(chartProps: ChartProps) {
   /**
    * This function is called after a successful response has been
@@ -50,47 +50,47 @@ export default function transformProps(chartProps: ChartProps) {
    */
 
   const { width, height, formData, queriesData } = chartProps;
-  console.log('Here is the', queriesData);
-  console.log('formData via TransformProps.ts', formData);
   const {
     boldText,
     headerFontSize,
     headerText,
-    groupby,
-    groupbyB,
-    metrics,
-    metricsB,
     colorPicker,
     showPolygonLayer,
     showStreetMap,
     showCircleLayer,
-    circleMapLevel,
-    polygonMapLevel,
+    mapLevel,
+    mapLevelB,
+    conditionalFormatting,
   } = formData;
   // now there are two types of record that i have to deal with
 
   const polygonData = queriesData[0].data as TimeseriesDataRecord[];
+  const polygonKeyColumn = queriesData[0].colnames[0];
+  const polygonValueColumn = queriesData[0].colnames[1];
+
   const circleData = queriesData[1].data as TimeseriesDataRecord[];
+  const circleKeyColumn = queriesData[1].colnames[0];
+  const circleValueColumn = queriesData[1].colnames[1];
   const color = `rgb(${colorPicker.r},${colorPicker.g},${colorPicker.b})`;
 
-  const polygonKeyColumn = groupby[0];
-  const circleKeyColumn = groupbyB[0];
-
-  const polygonValueColumn = metrics[0];
-  const circleValueColumn = metricsB[0];
+  // not that simple
 
   const polygon = {
     keyColumn: polygonKeyColumn,
     valueColumn: polygonValueColumn,
     data: polygonData,
-    mapLevel: polygonMapLevel,
+    mapLevel: mapLevel,
   };
   const circle = {
     keyColumn: circleKeyColumn,
     valueColumn: circleValueColumn,
     data: circleData,
-    mapLevel: circleMapLevel,
+    mapLevel: mapLevelB,
   };
+  const metricColorFormatters = getColorFormatters(
+    conditionalFormatting,
+    polygonData,
+  );
 
   return {
     width,
@@ -105,5 +105,6 @@ export default function transformProps(chartProps: ChartProps) {
     showPolygonLayer,
     showStreetMap,
     showCircleLayer,
+    metricColorFormatters,
   };
 }

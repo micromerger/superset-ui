@@ -305,12 +305,10 @@ const config: ControlPanelConfig = {
                   (explore?.controls?.metrics?.value as QueryFormMetric[]) ??
                   [];
                 const verboseMap = explore?.datasource?.verbose_map ?? {};
-                const metricColumn = values.map(value => {
-                  if (typeof value === 'string') {
-                    return { value, label: verboseMap[value] ?? value };
-                  }
-                  return { value: value.label, label: value.label };
-                });
+                const metricColumn = [
+                  { value: 'polygon', label: 'Polygon Metrics' },
+                  { value: 'circle', label: 'Circle Metrics' },
+                ];
                 return {
                   columnOptions: metricColumn,
                   verboseMap,

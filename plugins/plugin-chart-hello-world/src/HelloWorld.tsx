@@ -21,6 +21,7 @@ import { HelloWorldProps } from './types';
 // import Map from "./plugin/chart/highMaps";
 // import LeafletMap from "./plugin/react-chart/Map.js";
 import LeafletChart from './plugin/leaflet-chart.js';
+// import Map from "./plugin/components/Covid19.jsx"
 // The following Styles component is a <div> element, which has been styled using Emotion
 // For docs, visit https://emotion.sh/docs/styled
 
@@ -63,6 +64,7 @@ export default function HelloWorld(props: HelloWorldProps) {
     showPolygonLayer,
     showStreetMap,
     showCircleLayer,
+    metricColorFormatters,
   } = props;
 
   // Often, you just want to get a hold of the DOM and go nuts.
@@ -79,6 +81,9 @@ export default function HelloWorld(props: HelloWorldProps) {
   //     }
   //   }
   // })
+  console.log(metricColorFormatters);
+  // console.log(metricColorFormatters[0].getColorFromValue(1231))
+  // console.log(metricColorFormatters[1].getColorFromValue(123))
 
   return (
     <div>
@@ -92,6 +97,7 @@ export default function HelloWorld(props: HelloWorldProps) {
         showPolygonLayer={showPolygonLayer}
         showStreetMap={showStreetMap}
         showCircleLayer={showCircleLayer}
+        metricColorFormatters={metricColorFormatters}
       />
     </div>
   );

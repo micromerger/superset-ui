@@ -3,9 +3,9 @@
   "fieldAliases": {
     "FID": "FID",
     "ADM1_ID": "ADM1_ID",
-    "UN_PROV_N": "UN_PROV_N",
+    "NAME": "NAME",
     "GOV_PROV_N": "GOV_PROV_N",
-    "WHO_PROV_C": "WHO_PROV_C",
+    "CODE": "CODE",
     "WHO_PROV_N": "WHO_PROV_N",
     "MAP_LABEL": "MAP_LABEL"
   },
@@ -19,9 +19,9 @@
       "alias": "ADM1_ID"
     },
     {
-      "name": "UN_PROV_N",
+      "name": "NAME",
       "type": "esriFieldTypeString",
-      "alias": "UN_PROV_N",
+      "alias": "NAME",
       "length": 16
     },
     {
@@ -31,9 +31,9 @@
       "length": 22
     },
     {
-      "name": "WHO_PROV_C",
+      "name": "CODE",
       "type": "esriFieldTypeSmallInteger",
-      "alias": "WHO_PROV_C"
+      "alias": "CODE"
     },
     {
       "name": "WHO_PROV_N",
@@ -52,13 +52,13 @@
     {
       "type": "Feature",
       "properties": {
-        "FID": 0,
-        "ADM1_ID": 6,
-        "UN_PROV_N": "Punjab",
-        "GOV_PROV_N": "PUNJAB",
-        "WHO_PROV_C": 1,
-        "WHO_PROV_N": "PUNJAB",
-        "MAP_LABEL": "PUNJAB"
+        "FID": 5,
+        "ADM1_ID": 1,
+        "NAME": "Gilgit Baltistan",
+        "GOV_PROV_N": "GB",
+        "CODE": 6,
+        "WHO_PROV_N": "GBALTISTAN",
+        "MAP_LABEL": "GBALTISTAN"
       },
       "geometry": {
         "type": "Polygon",
@@ -1198,14 +1198,15 @@
     {
       "type": "Feature",
       "properties": {
-        "FID": 1,
-        "ADM1_ID": 8,
-        "UN_PROV_N": "Sindh",
-        "GOV_PROV_N": "SINDH",
-        "WHO_PROV_C": 2,
-        "WHO_PROV_N": "SINDH",
-        "MAP_LABEL": "SINDH"
+        "FID": 4,
+        "ADM1_ID": 3,
+        "NAME": "AJK",
+        "GOV_PROV_N": "AJK",
+        "CODE": 5,
+        "WHO_PROV_N": "AJK",
+        "MAP_LABEL": "AJK"
       },
+
       "geometry": {
         "type": "Polygon",
         "coordinates": [
@@ -2121,13 +2122,13 @@
     {
       "type": "Feature",
       "properties": {
-        "FID": 2,
-        "ADM1_ID": 2,
-        "UN_PROV_N": "KP",
-        "GOV_PROV_N": "KPK",
-        "WHO_PROV_C": 3,
-        "WHO_PROV_N": "KP",
-        "MAP_LABEL": "KP"
+        "FID": 6,
+        "ADM1_ID": 5,
+        "NAME": "Islamabad",
+        "GOV_PROV_N": "ISLAMABAD",
+        "CODE": 7,
+        "WHO_PROV_N": "ISLAMABAD",
+        "MAP_LABEL": "ISLAMABAD"
       },
       "geometry": {
         "type": "Polygon",
@@ -2355,14 +2356,15 @@
     {
       "type": "Feature",
       "properties": {
-        "FID": 3,
-        "ADM1_ID": 7,
-        "UN_PROV_N": "Balochistan",
-        "GOV_PROV_N": "BALUCHISTAN",
-        "WHO_PROV_C": 4,
-        "WHO_PROV_N": "BALOCHISTAN",
-        "MAP_LABEL": "BALOCHISTAN"
+        "FID": 7,
+        "ADM1_ID": 9,
+        "NAME": "INDIA-OCCUPIED KASHMIR",
+        "GOV_PROV_N": "INDIA-OCCUPIED KASHMIR",
+        "CODE": 0,
+        "WHO_PROV_N": "IIOJ&K",
+        "MAP_LABEL": "IIOJ&K"
       },
+
       "geometry": {
         "type": "Polygon",
         "coordinates": [
@@ -4212,14 +4214,15 @@
     {
       "type": "Feature",
       "properties": {
-        "FID": 4,
-        "ADM1_ID": 3,
-        "UN_PROV_N": "AJK",
-        "GOV_PROV_N": "AJK",
-        "WHO_PROV_C": 5,
-        "WHO_PROV_N": "AJK",
-        "MAP_LABEL": "AJK"
+        "FID": 0,
+        "ADM1_ID": 6,
+        "NAME": "Punjab",
+        "GOV_PROV_N": "PUNJAB",
+        "CODE": 1,
+        "WHO_PROV_N": "PUNJAB",
+        "MAP_LABEL": "PUNJAB"
       },
+
       "geometry": {
         "type": "Polygon",
         "coordinates": [
@@ -8046,14 +8049,15 @@
     {
       "type": "Feature",
       "properties": {
-        "FID": 5,
-        "ADM1_ID": 1,
-        "UN_PROV_N": "Gilgit Baltistan",
-        "GOV_PROV_N": "GB",
-        "WHO_PROV_C": 6,
-        "WHO_PROV_N": "GBALTISTAN",
-        "MAP_LABEL": "GBALTISTAN"
+        "FID": 1,
+        "ADM1_ID": 8,
+        "NAME": "Sindh",
+        "GOV_PROV_N": "SINDH",
+        "CODE": 2,
+        "WHO_PROV_N": "SINDH",
+        "MAP_LABEL": "SINDH"
       },
+
       "geometry": {
         "type": "Polygon",
         "coordinates": [
@@ -12102,14 +12106,15 @@
     {
       "type": "Feature",
       "properties": {
-        "FID": 6,
-        "ADM1_ID": 5,
-        "UN_PROV_N": "Islamabad",
-        "GOV_PROV_N": "ISLAMABAD",
-        "WHO_PROV_C": 7,
-        "WHO_PROV_N": "ISLAMABAD",
-        "MAP_LABEL": "ISLAMABAD"
+        "FID": 3,
+        "ADM1_ID": 7,
+        "NAME": "Balochistan",
+        "GOV_PROV_N": "BALUCHISTAN",
+        "CODE": 4,
+        "WHO_PROV_N": "BALOCHISTAN",
+        "MAP_LABEL": "BALOCHISTAN"
       },
+
       "geometry": {
         "type": "Polygon",
         "coordinates": [
@@ -20310,11 +20315,11 @@
       "properties": {
         "FID": 7,
         "ADM1_ID": 9,
-        "UN_PROV_N": " ",
-        "GOV_PROV_N": "INDIA-OCCUPIED KASHMIR",
-        "WHO_PROV_C": 0,
-        "WHO_PROV_N": "IIOJ&K",
-        "MAP_LABEL": "IIOJ&K"
+        "NAME": "KP",
+        "GOV_PROV_N": "KP",
+        "CODE": 3,
+        "WHO_PROV_N": "KP",
+        "MAP_LABEL": "KP"
       },
       "geometry": {
         "type": "Polygon",

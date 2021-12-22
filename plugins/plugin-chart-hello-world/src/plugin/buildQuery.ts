@@ -77,7 +77,7 @@ export default function buildQuery(formData: QueryFormData) {
   const queryContextB = buildQueryContext(formData2, baseQueryObject => {
     const queryObjectB = {
       ...baseQueryObject,
-      post_processing: [pivotOperator(formData1, baseQueryObject)],
+      post_processing: [pivotOperator(formData2, baseQueryObject)],
     } as QueryObject;
     return [queryObjectB];
   });

@@ -16,13 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { t } from '@superset-ui/core';
+import { t, TimeseriesDataRecord } from '@superset-ui/core';
 import {
   ControlPanelConfig,
   sections,
   sharedControls,
   ControlPanelSectionConfig,
 } from '@superset-ui/chart-controls';
+
+console.log(sharedControls);
 
 function createQuerySection(
   label: string,
@@ -35,19 +37,41 @@ function createQuerySection(
       [
         {
           name: `groupby${controlSuffix}`,
-          config: sharedControls.groupby,
+          config: {
+            ...sharedControls.groupby,
+            multi: false,
+            label: t('Area ID'),
+            description: t('Area id from Data Source'),
+          },
+        },
+      ],
+      [
+        {
+          name: `map_level${controlSuffix}`,
+          config: {
+            type: 'SelectControl',
+            label: t('Area Level'),
+            default: 'province',
+            choices: [
+              ['province', 'Province'],
+              ['district', 'District'],
+            ],
+            description: t('The Map Detail Level'),
+            renderTrigger: true,
+          },
         },
       ],
       [
         {
           name: `metrics${controlSuffix}`,
-          config: sharedControls.metrics,
+          config: sharedControls.metric,
         },
       ],
+
       [
         {
           name: `adhoc_filters${controlSuffix}`,
-          config: sharedControls.adhoc_filters,
+          config: { ...sharedControls.adhoc_filters },
         },
       ],
       [
@@ -148,85 +172,6 @@ const config: ControlPanelConfig = {
       controlSetRows: [
         [
           {
-            name: 'header_text',
-            config: {
-              type: 'TextControl',
-              default: 'Pakistan',
-              renderTrigger: true,
-              // ^ this makes it apply instantaneously, without triggering a "run query" button
-              label: t('Header Text'),
-              description: t('The text you want to see in the header'),
-            },
-          },
-        ],
-        [
-          {
-            name: 'bold_text',
-            config: {
-              type: 'CheckboxControl',
-              label: t('Bold Text'),
-              renderTrigger: true,
-              default: true,
-              description: t('A checkbox to make the '),
-            },
-          },
-        ],
-        [
-          {
-            name: 'polygon_map_level',
-            config: {
-              type: 'SelectControl',
-              label: t('Polygon Area Level'),
-              default: 'province',
-              choices: [
-                ['province', 'Province'],
-                ['district', 'District'],
-              ],
-              renderTrigger: true,
-              description: t('The Map Detail Level'),
-            },
-          },
-        ],
-        [
-          {
-            name: 'circle_map_level',
-            config: {
-              type: 'SelectControl',
-              label: t('Circle Area Level'),
-              default: 'province',
-              choices: [
-                ['province', 'Province'],
-                ['district', 'District'],
-              ],
-              renderTrigger: true,
-              description: t('The Map Detail Level'),
-            },
-          },
-        ],
-        [
-          {
-            name: 'header_font_size',
-            config: {
-              type: 'SelectControl',
-              label: t('Font Size'),
-              default: 'xl',
-              choices: [
-                // [value, label]
-                ['xxs', 'xx-small'],
-                ['xs', 'x-small'],
-                ['s', 'small'],
-                ['m', 'medium'],
-                ['l', 'large'],
-                ['xl', 'x-large'],
-                ['xxl', 'xx-large'],
-              ],
-              renderTrigger: true,
-              description: t('The size of your header font'),
-            },
-          },
-        ],
-        [
-          {
             name: 'show_street_map',
             config: {
               type: 'CheckboxControl',
@@ -258,6 +203,44 @@ const config: ControlPanelConfig = {
           },
         ],
         ['color_picker'],
+        [
+          {
+            name: 'conditional_formatting',
+            config: {
+              type: 'ConditionalFormattingControl',
+              renderTrigger: true,
+              label: t('Polygon Conditional formatting'),
+              description: t('Apply conditional color formatting to metrics'),
+              mapStateToProps(explore) {
+                console.log(
+                  explore?.controls?.metrics?.value as TimeseriesDataRecord,
+                  explore?.datasource?.verbose_map,
+                  explore?.controls,
+                );
+                const value =
+                  (explore?.controls?.metrics?.value as TimeseriesDataRecord) ??
+                  '';
+                // const value2 =
+                //   (explore?.controls?.metrics_b
+                //     ?.value as TimeseriesDataRecord) ?? '';
+                const verboseMap = explore?.datasource?.verbose_map ?? {};
+                const metricColumn =
+                  typeof value === 'string'
+                    ? { value, label: verboseMap[value] ?? value }
+                    : { value: value.label, label: value.label };
+                //   const metricColumn2 =
+                // typeof value2 === 'string'
+                //   ? { value2, label: verboseMap[value2] ?? value2 }
+                //   : { value: value2.label, label: value2.label };
+                const metricsColumns = [metricColumn];
+                return {
+                  columnOptions: metricsColumns,
+                  verboseMap,
+                };
+              },
+            },
+          },
+        ],
       ],
     },
   ],

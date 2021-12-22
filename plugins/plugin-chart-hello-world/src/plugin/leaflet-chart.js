@@ -42,7 +42,7 @@ var getCentroid = function (arr) {
 };
 
 const LeafletMap = props => {
-  const {
+  let {
     polygon,
     circle,
     color,
@@ -51,127 +51,131 @@ const LeafletMap = props => {
     showPolygonLayer,
     showStreetMap,
     showCircleLayer,
+    metricColorFormatters,
   } = props;
-  const [geoData, setGeoData] = useState(
-    polygon.mapLevel == 'province'
-      ? provinceData.features
-      : districtData.features,
-  );
-  const [circleData, setCircleData] = useState(
-    circle.mapLevel == 'province'
-      ? provinceData.features
-      : districtData.features,
-  );
+  const mapContainer = useRef(null);
   const geoJsonLayer = useRef(null);
+
   const provinceStyles = {
-    fillColor: color,
+    // fillColor: color,
     color: 'black',
-    weight: 2,
+    weight: 1,
   };
-  let highestValuePolygon = 0;
-  let highestValueCircle = 0;
+  const [state, setState] = useState(0);
   // calculating the total value of that value props
-  polygon.data.forEach(element => {
-    if (element[polygon.valueColumn] > highestValuePolygon)
-      highestValuePolygon = element[polygon.valueColumn];
-  });
 
-  circle.data.forEach(element => {
-    if (element[circle.valueColumn] > highestValueCircle)
-      highestValueCircle = element[circle.valueColumn];
-  });
-  const onEachArea = (area, layer) => {
-    switch (polygon.mapLevel) {
-      case 'district':
-        return polygon.data.map(item => {
-          if (item[polygon.keyColumn] == area.properties.DISTRICT_C) {
-            layer.bindTooltip(
-              `${area.properties.DISTRICT_N} [ ${polygon.valueColumn} : ${
-                item[polygon.valueColumn]
-              } ]`,
-            );
-            layer.options.fillOpacity =
-              item[polygon.valueColumn] / highestValuePolygon;
-          }
-        });
-      case 'province':
-        return polygon.data.map(item => {
-          if (item[polygon.keyColumn] == area.properties.WHO_PROV_C) {
-            layer.bindTooltip(
-              `${area.properties.GOV_PROV_N} ( ${polygon.valueColumn} : ${
-                item[polygon.valueColumn]
-              } )`,
-            );
-            console.log(
-              area.properties.GOV_PROV_N,
-              polygon.valueColumn,
+  const polygonDrawData = () => {
+    // we will collect the highest here
+    let highestPolygonData = 0;
+    polygon.data.forEach(item =>
+      item[polygon.valueColumn] > highestPolygonData
+        ? (highestPolygonData = item[polygon.valueColumn])
+        : null,
+    );
+    const geoJason =
+      polygon.mapLevel == 'province'
+        ? provinceData.features
+        : districtData.features;
+    let data = [];
+    polygon.data.map(item => {
+      const mainData = geoJason.find(
+        area => area.properties.CODE == item[polygon.keyColumn],
+      );
+      if (mainData) {
+        console.log(mainData.properties.color, mainData.properties.value);
+        mainData.properties.color = undefined;
+        mainData.properties.value = undefined;
+        mainData.properties.ratio = undefined;
+        mainData.properties.value = item[polygon.valueColumn];
+        data.push(mainData);
+        if (metricColorFormatters && metricColorFormatters.length > 0) {
+          mainData.properties.formatter = 'custom';
+          metricColorFormatters.map(formatter => {
+            mainData.properties.color = formatter.getColorFromValue(
               item[polygon.valueColumn],
-            );
-            layer.options.fillOpacity =
-              item[polygon.valueColumn] / highestValuePolygon;
-          }
-        });
-      default:
-        return polygon.data.map(item => {
-          if (item[polygon.keyColumn] == area.properties.name) {
-            layer.bindTooltip(
-              `${area.properties.name} ( ${polygon.valueColumn} : ${
-                item[polygon.valueColumn]
-              } )`,
-            );
-            layer.options.fillOpacity =
-              item[polygon.valueColumn] / highestValuePolygon;
-          }
-        });
-    }
-  };
-  var getRadius = areaProperties => {
-    let radius = 0;
-    let title = '';
-    let subTitle = '';
-    // now we will compare the valueProperty from areaproperties to find out if the are match the querydata
-    if (circle.mapLevel == 'district') {
-      circle.data.map(item => {
-        if (item[circle.keyColumn] == areaProperties.DISTRICT_C) {
-          radius = (item[circle.valueColumn] / highestValueCircle) * 10;
-          title = `${areaProperties.DISTRICT_N}`;
-          subTitle = `${circle.valueColumn}  : ${item[circle.valueColumn]}`;
+            )
+              ? formatter.getColorFromValue(item[polygon.valueColumn])
+              : mainData.properties.color;
+          });
+        } else {
+          mainData.properties.formatter = 'default';
+          mainData.properties.color = color;
+          mainData.properties.ratio = Number(
+            item[polygon.valueColumn] / highestPolygonData,
+          ).toPrecision(2);
         }
-      });
-    } else if (circle.mapLevel == 'province') {
-      circle.data.map(item => {
-        if (item[circle.keyColumn] == areaProperties.WHO_PROV_C) {
-          radius = (item[circle.valueColumn] / highestValueCircle) * 10;
-          title = `${areaProperties.WHO_PROV_N}`;
-          subTitle = `${circle.valueColumn}  : ${item[circle.valueColumn]}`;
-        }
-      });
-    }
-    return { radius, title, subTitle };
-  };
-
-  useEffect(() => {
-    if (geoJsonLayer.current) {
-      if (polygon.mapLevel == 'province') {
-        geoJsonLayer.current.clearLayers().addData(provinceData.features);
-        setGeoData(provinceData.features);
-      } else if (polygon.mapLevel == 'district') {
-        geoJsonLayer.current.clearLayers().addData(districtData.features);
-        setGeoData(districtData.features);
       }
-    }
-  }, [polygon.mapLevel]);
+    });
+    return data;
+  };
 
+  const getRGBValues = str => {
+    var vals = str.match(
+      /rgba?\((\d{1,3}), ?(\d{1,3}), ?(\d{1,3})\)?(?:, ?(\d(?:\.\d?))\))?/,
+    );
+    return `rgb(${vals[1]} , ${vals[2]} , ${vals[3]} )`;
+  };
+  const onEachArea = (area, layer) => {
+    layer.bindTooltip(
+      `${area.properties.NAME} [ ${polygon.valueColumn} : ${
+        area.properties.value || 'UNKNOWN'
+      } ]`,
+    );
+    console.log(area.properties, state);
+    if (area.properties.formatter === 'default') {
+      layer.options.fillOpacity = area.properties.ratio;
+      layer.options.fillColor = area.properties.color;
+    } else {
+      layer.options.fillColor = area.properties.color
+        ? getRGBValues(area.properties.color)
+        : 'rgba(255,255,255, 0)';
+      layer.options.fillOpacity = 1;
+    }
+  };
+  const circleDrawData = () => {
+    let highestValueCircle = 0;
+    const geoJason =
+      circle.mapLevel == 'province'
+        ? provinceData.features
+        : districtData.features;
+    circle.data.forEach(element => {
+      if (element[circle.valueColumn] > highestValueCircle)
+        highestValueCircle = element[circle.valueColumn];
+    });
+    // now we will compare the valueProperty from areaproperties to find out if the are match the querydata
+    let data = [];
+    circle.data.map(item => {
+      const mainData = geoJason.find(
+        area => area.properties.CODE == item[circle.keyColumn],
+      );
+      if (mainData) {
+        mainData.properties.value = item[circle.valueColumn];
+        mainData.properties.radius = Number(
+          (item[circle.valueColumn] / highestValueCircle) * 10,
+        );
+        data.push(mainData);
+      }
+    });
+    return data;
+  };
   useEffect(() => {
-    if (circle.mapLevel == 'province') {
-      setCircleData(provinceData.features);
-    } else if (circle.mapLevel == 'district')
-      setCircleData(districtData.features);
-  }, [circle.mapLevel]);
+    //i will add the fields directly into the data.
+    if (geoJsonLayer.current) {
+      geoJsonLayer.current.clearLayers().addData(polygonDrawData());
+    }
+  }, [polygon.mapLevel, polygon.data, polygon.valueColumn, polygon.keyColumn]);
+
+  useEffect(() => {}, [
+    circle.mapLevel,
+    circle.data,
+    circle.keyColumn,
+    circle.valueColumn,
+  ]);
 
   return (
     <div style={{ width: width, height: height }}>
       <MapContainer
+        ref={mapContainer}
         zoom={4}
         center={[30.3753, 69.3451]}
         style={{ height: '100%', width: '100%' }}
@@ -184,19 +188,34 @@ const LeafletMap = props => {
           />
         ) : null}
         {/* showing polygon based on checkbox */}
+        {/* {
+          <Polygon
+            pathOptions={{ color: 'purple' }}
+            positions={feature.geometry.coordinates}
+          >
+            <Tooltip sticky>sticky Tooltip for Polygon</Tooltip>
+          </Polygon>
+        } */}
+        {/* <Polygon
+          pathOptions={{ color: 'purple' }}
+          positions={polygonData[0].geometry.coordinates}
+        >
+          <Tooltip sticky>sticky Tooltip for Polygon</Tooltip>
+        </Polygon> */}
         {showPolygonLayer ? (
           <GeoJSON
             ref={geoJsonLayer}
             style={provinceStyles}
             onEachFeature={onEachArea}
-            data={geoData}
+            data={polygonDrawData()}
           />
         ) : null}
         {showCircleLayer
           ? /* showing boxex in the center based on checkbox  */
-            circleData.map((area, index) => {
-              let { radius, title, subTitle } = getRadius(area.properties);
-
+            circleDrawData().map((area, index) => {
+              let { radius, value } = area.properties;
+              let title = area.properties.NAME;
+              let subTitle = `[ ${circle.valueColumn} : ${value} ]`;
               if (radius > 1)
                 return (
                   <CircleMarker

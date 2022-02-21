@@ -40,7 +40,7 @@ export default class HelloWorldChartPlugin extends ChartPlugin {
       name: t('Pakistan Map'),
       thumbnail,
       tags: [
-        t('Pakistan Mao'),
+        t('Pakistan Map'),
         t('2D'),
         t('Aesthetic'),
         t('Comparison'),

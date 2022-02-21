@@ -44,10 +44,17 @@ type QueryDataRefined = {
   mapLevel: String;
 };
 
+type QueryDataRefined2 = {
+  keyColumn: String;
+  valueColumn: String[];
+  data: TimeseriesDataRecord[];
+  mapLevel: String;
+};
+
 export type HelloWorldProps = HelloWorldStylesProps &
   HelloWorldCustomizeProps & {
     circle: QueryDataRefined;
-    polygon: QueryDataRefined;
+    polygon: QueryDataRefined2;
     height: number;
     width: number;
     mapLevel: String;
@@ -57,7 +64,8 @@ export type HelloWorldProps = HelloWorldStylesProps &
     headerText: String;
     showPolygonLayer: Boolean;
     showStreetMap: Boolean;
-    showCircleLayer: Boolean;
+    showCircleLayer: String;
     metricColorFormatters: ColorFormatters;
+    numberFormat: string;
     // add typing here for the props you pass in from transformProps.ts!
   };

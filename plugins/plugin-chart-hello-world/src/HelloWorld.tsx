@@ -18,6 +18,7 @@
  */
 import React from 'react';
 import { HelloWorldProps } from './types';
+import { getNumberFormatter } from '@superset-ui/core';
 // import Map from "./plugin/chart/highMaps";
 // import LeafletMap from "./plugin/react-chart/Map.js";
 import LeafletChart from './plugin/leaflet-chart.js';
@@ -65,6 +66,7 @@ export default function HelloWorld(props: HelloWorldProps) {
     showStreetMap,
     showCircleLayer,
     metricColorFormatters,
+    numberFormat,
   } = props;
 
   // Often, you just want to get a hold of the DOM and go nuts.
@@ -82,9 +84,9 @@ export default function HelloWorld(props: HelloWorldProps) {
   //   }
   // })
   console.log(metricColorFormatters);
+  const format = getNumberFormatter(numberFormat);
   // console.log(metricColorFormatters[0].getColorFromValue(1231))
   // console.log(metricColorFormatters[1].getColorFromValue(123))
-
   return (
     <div>
       {/* <Map headerText={props.headerText} data={filteredData} mapLevel={mapLevel}/> */}
@@ -98,6 +100,7 @@ export default function HelloWorld(props: HelloWorldProps) {
         showStreetMap={showStreetMap}
         showCircleLayer={showCircleLayer}
         metricColorFormatters={metricColorFormatters}
+        format={format}
       />
     </div>
   );

@@ -22,9 +22,11 @@ import {
   sections,
   sharedControls,
   ControlPanelSectionConfig,
+  D3_FORMAT_OPTIONS,
+  D3_FORMAT_DOCS,
 } from '@superset-ui/chart-controls';
 
-console.log(sharedControls);
+console.log('-------', sharedControls);
 
 function createQuerySection(
   label: string,
@@ -40,7 +42,8 @@ function createQuerySection(
           config: {
             ...sharedControls.groupby,
             multi: false,
-            label: t('Area ID'),
+            optional: true,
+            label: t('Location'),
             description: t('Area id from Data Source'),
           },
         },
@@ -50,7 +53,7 @@ function createQuerySection(
           name: `map_level${controlSuffix}`,
           config: {
             type: 'SelectControl',
-            label: t('Area Level'),
+            label: t('Location Level'),
             default: 'province',
             choices: [
               ['province', 'Province'],
@@ -64,7 +67,10 @@ function createQuerySection(
       [
         {
           name: `metrics${controlSuffix}`,
-          config: sharedControls.metric,
+          config:
+            controlSuffix === '_b'
+              ? { ...sharedControls.metrics, optional: true, validators: [] }
+              : { ...sharedControls.metric, optional: true, validators: [] },
         },
       ],
 
@@ -164,45 +170,55 @@ const config: ControlPanelConfig = {
   // For control input types, see: superset-frontend/src/explore/components/controls/index.js
   controlPanelSections: [
     sections.legacyRegularTime,
-    createQuerySection(t('Polygon'), ''),
-    createQuerySection(t('Circle'), '_b'),
     {
-      label: t('Map Controls!'),
+      label: 'Polygon',
       expanded: true,
       controlSetRows: [
         [
           {
-            name: 'show_street_map',
+            name: `groupby`,
             config: {
-              type: 'CheckboxControl',
-              label: t('Street Map'),
-              renderTrigger: true,
-              default: true,
-              description: t('Whether to show the street map layer'),
-            },
-          },
-          {
-            name: 'show_polygon_layer',
-            config: {
-              type: 'CheckboxControl',
-              label: t('Polygon Layer'),
-              renderTrigger: true,
-              default: true,
-              description: t('Whether to show the ploygon map'),
-            },
-          },
-          {
-            name: 'show_circle_layer',
-            config: {
-              type: 'CheckboxControl',
-              label: t('Circle Layer'),
-              renderTrigger: true,
-              default: true,
-              description: t('Whether to show the circles on map'),
+              ...sharedControls.groupby,
+              multi: false,
+              optional: true,
+              label: t('Location'),
+              description: t('Area id from Data Source'),
             },
           },
         ],
-        ['color_picker'],
+        [
+          {
+            name: `map_level`,
+            config: {
+              type: 'SelectControl',
+              label: t('Location Level'),
+              default: 'province',
+              choices: [
+                ['province', 'Province'],
+                ['district', 'District'],
+              ],
+              description: t('The Map Detail Level'),
+              renderTrigger: true,
+            },
+          },
+        ],
+        [
+          {
+            name: `metrics`,
+            config: {
+              ...sharedControls.metric,
+              optional: true,
+              validators: [],
+            },
+          },
+        ],
+
+        [
+          {
+            name: `adhoc_filters`,
+            config: { ...sharedControls.adhoc_filters },
+          },
+        ],
         [
           {
             name: 'conditional_formatting',
@@ -241,6 +257,132 @@ const config: ControlPanelConfig = {
             },
           },
         ],
+        [
+          {
+            name: `row_limit`,
+            config: {
+              ...sharedControls.row_limit,
+            },
+          },
+        ],
+      ],
+    },
+    {
+      label: 'Circle',
+      expanded: true,
+      controlSetRows: [
+        [
+          {
+            name: `groupby_b`,
+            config: {
+              ...sharedControls.groupby,
+              multi: false,
+              optional: true,
+              label: t('Area ID'),
+              description: t('Area id from Data Source'),
+            },
+          },
+        ],
+        [
+          {
+            name: `map_level_b`,
+            config: {
+              type: 'SelectControl',
+              label: t('Area Level'),
+              default: 'province',
+              choices: [
+                ['province', 'Province'],
+                ['district', 'District'],
+              ],
+              description: t('The Map Detail Level'),
+              renderTrigger: true,
+            },
+          },
+        ],
+        [
+          {
+            name: `metrics_b`,
+            config: {
+              ...sharedControls.metrics,
+              optional: true,
+              validators: [],
+            },
+          },
+        ],
+        [
+          {
+            name: 'show_circle_layer',
+            config: {
+              type: 'SelectControl',
+              label: t('Circle Layer'),
+              default: 'percentage',
+              choices: [
+                ['none', 'None'],
+                ['circle', 'Show Values'],
+                ['percentage', 'Show Percentage'],
+              ],
+              description: t('The Map Detail Level'),
+              renderTrigger: true,
+            },
+          },
+        ],
+        [
+          {
+            name: 'number_format',
+            config: {
+              type: 'SelectControl',
+              freeForm: true,
+              label: t('Number format'),
+              renderTrigger: true,
+              default: 'SMART_NUMBER',
+              choices: D3_FORMAT_OPTIONS,
+              description: D3_FORMAT_DOCS,
+            },
+          },
+        ],
+        [
+          {
+            name: `adhoc_filters_b`,
+            config: { ...sharedControls.adhoc_filters },
+          },
+        ],
+        [
+          {
+            name: `row_limit_b`,
+            config: {
+              ...sharedControls.row_limit,
+            },
+          },
+        ],
+      ],
+    },
+    {
+      label: t('Map Controls!'),
+      expanded: true,
+      controlSetRows: [
+        [
+          {
+            name: 'show_street_map',
+            config: {
+              type: 'CheckboxControl',
+              label: t('Street Map'),
+              renderTrigger: true,
+              default: true,
+              description: t('Whether to show the street map layer'),
+            },
+          },
+          {
+            name: 'show_polygon_layer',
+            config: {
+              type: 'CheckboxControl',
+              label: t('Polygon Layer'),
+              renderTrigger: true,
+              default: true,
+              description: t('Whether to show the ploygon map'),
+            },
+          },
+        ],
+        ['color_picker'],
       ],
     },
   ],

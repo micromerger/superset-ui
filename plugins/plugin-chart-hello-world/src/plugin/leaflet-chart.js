@@ -1,6 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
+import MarkerClusterGroup from 'react-leaflet-markercluster';
+
 import provinceData from './Pakistan JSON Shape files/Province.json';
 const districtData = require('./Pakistan JSON Shape files/District.json');
+import ReactDOMServer from 'react-dom/server';
+import L from 'leaflet';
+import PercentageIcon from './percentage';
+import PieIcon from './pie';
 // import districtData from 'file-loader!./Pakistan JSON Shape files/District.json';
 // import tehsilData from './Pakistan JSON Shape files/Tehsil.json';
 // import ucData from './Pakistan JSON Shape files/UC.json';
@@ -10,9 +16,12 @@ import {
   TileLayer,
   CircleMarker,
   Popup,
+  Tooltip,
+  Marker,
+  useMap,
 } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
-
+import 'react-leaflet-markercluster/dist/styles.min.css';
 //formula to get the center
 var getCentroid = function (arr) {
   var twoTimesSignedArea = 0;
@@ -40,6 +49,7 @@ var getCentroid = function (arr) {
     cxTimes6SignedArea / sixSignedArea,
   ];
 };
+const colors = ['#E38627', '#C13C37', '#6A2135', '#FF5733', '#FF3386'];
 
 const LeafletMap = props => {
   let {
@@ -52,6 +62,7 @@ const LeafletMap = props => {
     showStreetMap,
     showCircleLayer,
     metricColorFormatters,
+    format,
   } = props;
   const mapContainer = useRef(null);
   const geoJsonLayer = useRef(null);
@@ -61,10 +72,25 @@ const LeafletMap = props => {
     color: 'black',
     weight: 1,
   };
-  const [state, setState] = useState(0);
+  const [state, setState] = useState({
+    lat: 51.505,
+    lng: -0.09,
+    zoom: 13,
+    key: 0,
+  });
   // calculating the total value of that value props
 
   const polygonDrawData = () => {
+    if (
+      !polygon.data ||
+      polygon.data.length == 0 ||
+      !polygon.mapLevel ||
+      !polygon.keyColumn ||
+      !polygon.valueColumn
+    ) {
+      console.log('returning null, polygon');
+      return [];
+    }
     // we will collect the highest here
     let highestPolygonData = 0;
     polygon.data.forEach(item =>
@@ -82,12 +108,10 @@ const LeafletMap = props => {
         area => area.properties.CODE == item[polygon.keyColumn],
       );
       if (mainData) {
-        console.log(mainData.properties.color, mainData.properties.value);
         mainData.properties.color = undefined;
         mainData.properties.value = undefined;
         mainData.properties.ratio = undefined;
         mainData.properties.value = item[polygon.valueColumn];
-        data.push(mainData);
         if (metricColorFormatters && metricColorFormatters.length > 0) {
           mainData.properties.formatter = 'custom';
           metricColorFormatters.map(formatter => {
@@ -104,6 +128,7 @@ const LeafletMap = props => {
             item[polygon.valueColumn] / highestPolygonData,
           ).toPrecision(2);
         }
+        if (item[polygon.valueColumn]) data.push(mainData);
       }
     });
     return data;
@@ -133,30 +158,64 @@ const LeafletMap = props => {
     }
   };
   const circleDrawData = () => {
+    if (
+      !circle.data ||
+      circle.data.length == 0 ||
+      !circle.mapLevel ||
+      !circle.keyColumn ||
+      !circle.valueColumn
+    ) {
+      console.log('returning null, circle');
+      return [];
+    }
     let highestValueCircle = 0;
+    let totalValueCircle = 0;
     const geoJason =
       circle.mapLevel == 'province'
         ? provinceData.features
         : districtData.features;
-    circle.data.forEach(element => {
-      if (element[circle.valueColumn] > highestValueCircle)
-        highestValueCircle = element[circle.valueColumn];
-    });
-    // now we will compare the valueProperty from areaproperties to find out if the are match the querydata
-    let data = [];
-    circle.data.map(item => {
-      const mainData = geoJason.find(
-        area => area.properties.CODE == item[circle.keyColumn],
-      );
-      if (mainData) {
-        mainData.properties.value = item[circle.valueColumn];
-        mainData.properties.radius = Number(
-          (item[circle.valueColumn] / highestValueCircle) * 10,
+
+    // now we will check for multi column values on the basis of which I will calcultate the circle draw data
+    if (circle.valueColumn.length === 1) {
+      circle.data.forEach(element => {
+        totalValueCircle = element[circle.valueColumn[0]] + totalValueCircle;
+      });
+      circle.data.forEach(element => {
+        if (highestValueCircle < element[circle.valueColumn[0]])
+          highestValueCircle = element[circle.valueColumn[0]];
+      });
+      // now we will compare the valueProperty from areaproperties to find out if the are match the querydata
+      let data = [];
+      circle.data.forEach(item => {
+        const mainData = geoJason.find(
+          area => area.properties.CODE == item[circle.keyColumn],
         );
-        data.push(mainData);
-      }
-    });
-    return data;
+        if (mainData) {
+          mainData.properties.value = item[circle.valueColumn[0]];
+          mainData.properties.percentage = Number(
+            Math.floor((item[circle.valueColumn[0]] / totalValueCircle) * 100),
+          );
+          if (item[circle.valueColumn[0]]) data.push(mainData);
+        }
+      });
+      return data;
+    } else if (circle.valueColumn.length === 2) {
+      // now I will be calculating the value fro piecharts
+      let data = [];
+      circle.data.forEach(item => {
+        const mainData = geoJason.find(
+          area => area.properties.CODE == item[circle.keyColumn],
+        );
+        if (mainData) {
+          mainData.properties.pieData = circle.valueColumn.map(valColumn => ({
+            value: item[valColumn],
+            title: valColumn,
+          }));
+          data.push(mainData);
+        }
+      });
+      return data;
+    } else return [];
   };
   useEffect(() => {
     //i will add the fields directly into the data.
@@ -171,12 +230,16 @@ const LeafletMap = props => {
     circle.keyColumn,
     circle.valueColumn,
   ]);
-
+  // const icon = L.divIcon({
+  //   className: 'custom-icon',
+  //   html: ReactDOMServer.renderToString(<Icon perc={state.key} />),
+  // });
   return (
     <div style={{ width: width, height: height }}>
       <MapContainer
         ref={mapContainer}
         zoom={4}
+        maxZoom={8}
         center={[30.3753, 69.3451]}
         style={{ height: '100%', width: '100%' }}
       >
@@ -187,21 +250,6 @@ const LeafletMap = props => {
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
         ) : null}
-        {/* showing polygon based on checkbox */}
-        {/* {
-          <Polygon
-            pathOptions={{ color: 'purple' }}
-            positions={feature.geometry.coordinates}
-          >
-            <Tooltip sticky>sticky Tooltip for Polygon</Tooltip>
-          </Polygon>
-        } */}
-        {/* <Polygon
-          pathOptions={{ color: 'purple' }}
-          positions={polygonData[0].geometry.coordinates}
-        >
-          <Tooltip sticky>sticky Tooltip for Polygon</Tooltip>
-        </Polygon> */}
         {showPolygonLayer ? (
           <GeoJSON
             ref={geoJsonLayer}
@@ -210,27 +258,94 @@ const LeafletMap = props => {
             data={polygonDrawData()}
           />
         ) : null}
-        {showCircleLayer
-          ? /* showing boxex in the center based on checkbox  */
-            circleDrawData().map((area, index) => {
-              let { radius, value } = area.properties;
-              let title = area.properties.NAME;
-              let subTitle = `[ ${circle.valueColumn} : ${value} ]`;
-              if (radius > 1)
-                return (
-                  <CircleMarker
-                    center={getCentroid(area.geometry.coordinates[0])}
-                    pathOptions={{ color: 'red' }}
-                    radius={radius}
-                  >
-                    <Popup>
-                      {title} <br /> {subTitle}
-                    </Popup>
-                  </CircleMarker>
-                );
-              else return null;
-            })
-          : null}
+        {showCircleLayer === 'none' ? null : showCircleLayer == 'circle' ? (
+          <MarkerClusterGroup>
+            {circleDrawData().map((area, index) => {
+              let { value } = area.properties;
+              return (
+                <Marker
+                  position={getCentroid(area.geometry.coordinates[0])}
+                  icon={L.divIcon({
+                    className: 'custom-icon',
+                    html: ReactDOMServer.renderToString(
+                      <dev
+                        style={{ position: 'absolute', top: -10, left: -10 }}
+                      >
+                        <h4>{format(value)}</h4>
+                      </dev>,
+                    ),
+                  })}
+                />
+              );
+            })}
+          </MarkerClusterGroup>
+        ) : (
+          <MarkerClusterGroup>
+            {circleDrawData().map((area, index) => {
+              let { percentage, value, pieData } = area.properties;
+              return (
+                <Marker
+                  position={getCentroid(area.geometry.coordinates[0])}
+                  icon={L.divIcon({
+                    className: 'custom-icon',
+                    html: ReactDOMServer.renderToString(
+                      circle.valueColumn.length === 1 ? (
+                        <PercentageIcon perc={percentage} />
+                      ) : (
+                        <PieIcon data={pieData} />
+                      ),
+                    ),
+                  })}
+                />
+              );
+            })}
+          </MarkerClusterGroup>
+        )}
+        {/* showring legend */}
+        {circle?.valueColumn?.length > 1 && showCircleLayer !== 'circle' ? (
+          <div
+            style={{
+              bottom: 20,
+              right: 0,
+              zIndex: 1000,
+              width: 150,
+              position: 'absolute',
+              borderBottomColor: 'white',
+              borderBottomWidth: 20,
+            }}
+          >
+            {circle.valueColumn.map((valColumn, index) => (
+              <div style={{ justifyContent: 'center', alignContent: 'center' }}>
+                <span
+                  style={{
+                    width: '12px',
+                    height: '12px',
+                    marginBottom: '-2px',
+                    backgroundColor: colors[index],
+                    borderRadius: '50%',
+                    display: 'inline-block',
+                  }}
+                />
+                {`  ${valColumn}`}
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div
+            style={{
+              bottom: 0,
+              right: 0,
+              zIndex: 1000,
+              width: 100,
+              height: 20,
+              position: 'absolute',
+              backgroundColor: 'white',
+              borderBottomWidth: 20,
+            }}
+          >
+            EOC BI Charts
+          </div>
+        )}
       </MapContainer>
     </div>
   );

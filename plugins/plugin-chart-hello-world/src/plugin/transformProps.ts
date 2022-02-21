@@ -61,20 +61,26 @@ export default function transformProps(chartProps: ChartProps) {
     mapLevel,
     mapLevelB,
     conditionalFormatting,
+    numberFormat,
   } = formData;
+  console.log('VIP', queriesData);
   // now there are two types of record that i have to deal with
 
-  const polygonData = queriesData[0].data as TimeseriesDataRecord[];
-  const polygonKeyColumn = queriesData[0].colnames[0];
-  const polygonValueColumn = queriesData[0].colnames[1];
+  const polygonData = queriesData[0]?.data as TimeseriesDataRecord[];
+  const polygonKeyColumn = queriesData[0]?.colnames[0];
+  const polygonValueColumn = queriesData[0]?.colnames[1];
 
-  const circleData = queriesData[1].data as TimeseriesDataRecord[];
-  const circleKeyColumn = queriesData[1].colnames[0];
-  const circleValueColumn = queriesData[1].colnames[1];
+  const circleData = queriesData[1]?.data as TimeseriesDataRecord[];
+  const circleKeyColumn = queriesData[1]?.colnames[0];
+  const circleValueColumn = queriesData[1]?.colnames.slice(
+    1,
+    queriesData[1]?.colnames?.length,
+  );
+
   const color = `rgb(${colorPicker.r},${colorPicker.g},${colorPicker.b})`;
 
   // not that simple
-
+  console.log(numberFormat);
   const polygon = {
     keyColumn: polygonKeyColumn,
     valueColumn: polygonValueColumn,
@@ -91,7 +97,6 @@ export default function transformProps(chartProps: ChartProps) {
     conditionalFormatting,
     polygonData,
   );
-
   return {
     width,
     height,
@@ -106,5 +111,6 @@ export default function transformProps(chartProps: ChartProps) {
     showStreetMap,
     showCircleLayer,
     metricColorFormatters,
+    numberFormat,
   };
 }

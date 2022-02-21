@@ -81,9 +81,30 @@ export default function buildQuery(formData: QueryFormData) {
     } as QueryObject;
     return [queryObjectB];
   });
+  console.log('groupBy', groupby);
+  console.log('groupBy_b', groupby_b);
+  if (Array.isArray(groupby) && Array.isArray(groupby_b)) {
+    console.log('Both null');
+    return;
+  }
+  if (Array.isArray(groupby)) {
+    console.log('1st null ');
 
-  return {
-    ...queryContextA,
-    queries: [...queryContextA.queries, ...queryContextB.queries],
-  };
+    return {
+      ...queryContextA,
+      queries: [...queryContextB.queries],
+    };
+  } else if (Array.isArray(groupby_b)) {
+    console.log('2nd null ');
+    return {
+      ...queryContextA,
+      queries: [...queryContextA.queries],
+    };
+  } else if (groupby_b && groupby) {
+    console.log('both available');
+    return {
+      ...queryContextA,
+      queries: [...queryContextA.queries, ...queryContextB.queries],
+    };
+  }
 }
